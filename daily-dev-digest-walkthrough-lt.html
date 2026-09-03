@@ -1,0 +1,954 @@
+<title>Daily Dev Digest</title>
+<style>
+/* ============ FONTS ============ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* ============ TOKENS ============ */
+:root{
+  --paper: #eef1ed;
+  --paper-raised: #e4e8e2;
+  --ink: #171b19;
+  --ink-soft: #4a534d;
+  --ink-faint: #838d86;
+  --line: rgba(23,27,25,0.14);
+  --line-strong: rgba(23,27,25,0.28);
+
+  --feed: #b5651d;
+  --feed-soft: #e7d3bd;
+  --feed-ink: #6e3d10;
+
+  --ai: #1f7a6c;
+  --ai-soft: #cfe6e1;
+  --ai-ink: #114f45;
+
+  --warn: #b23a2e;
+  --warn-soft: #f0d9d5;
+  --tip: #1f6fa8;
+  --tip-soft: #d3e4f0;
+  --check: #4c7a3d;
+  --check-soft: #dbe8d4;
+
+  --code-bg: #1c211f;
+  --code-ink: #dfe6e0;
+  --code-comment: #7d9184;
+  --code-string: #d6a86b;
+  --code-key: #7fb8a8;
+  --code-num: #c98a5a;
+  --code-fn: #9fc4e0;
+
+  --shadow: 0 1px 2px rgba(23,27,25,0.06), 0 8px 24px -12px rgba(23,27,25,0.18);
+  --radius: 10px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Archivo", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper: #141715;
+    --paper-raised: #1b1f1c;
+    --ink: #e9ece7;
+    --ink-soft: #aab3ac;
+    --ink-faint: #6c766f;
+    --line: rgba(233,236,231,0.14);
+    --line-strong: rgba(233,236,231,0.26);
+
+    --feed: #d98a3d;
+    --feed-soft: #3a2c1c;
+    --feed-ink: #f0c99a;
+
+    --ai: #4bb3a2;
+    --ai-soft: #1c332f;
+    --ai-ink: #a9dcd1;
+
+    --warn: #e2887c;
+    --warn-soft: #3a2320;
+    --tip: #7fb3d9;
+    --tip-soft: #1e2c36;
+    --check: #8bc177;
+    --check-soft: #23331e;
+
+    --code-bg: #0e1110;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper: #141715;
+  --paper-raised: #1b1f1c;
+  --ink: #e9ece7;
+  --ink-soft: #aab3ac;
+  --ink-faint: #6c766f;
+  --line: rgba(233,236,231,0.14);
+  --line-strong: rgba(233,236,231,0.26);
+  --feed: #d98a3d;
+  --feed-soft: #3a2c1c;
+  --feed-ink: #f0c99a;
+  --ai: #4bb3a2;
+  --ai-soft: #1c332f;
+  --ai-ink: #a9dcd1;
+  --warn: #e2887c;
+  --warn-soft: #3a2320;
+  --tip: #7fb3d9;
+  --tip-soft: #1e2c36;
+  --check: #8bc177;
+  --check-soft: #23331e;
+  --code-bg: #0e1110;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;}
+a{color:var(--ink);}
+a:focus-visible, button:focus-visible, summary:focus-visible{
+  outline:2px solid var(--ai); outline-offset:2px;
+}
+::selection{ background:var(--feed-soft); color:var(--feed-ink); }
+
+.wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1180px; margin:0 auto; padding:14px 32px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.brand{
+  font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--ink-soft); display:flex; align-items:center; gap:8px;
+}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:var(--feed);}
+.topbar nav{display:flex; gap:22px; font-family:var(--font-mono); font-size:12px; letter-spacing:0.02em;}
+.topbar nav a{text-decoration:none; color:var(--ink-faint); transition:color .15s;}
+.topbar nav a:hover{color:var(--ink);}
+
+/* ============ HERO ============ */
+.hero{ padding:64px 0 40px; }
+.hero-eyebrow{
+  font-family:var(--font-mono); font-size:12.5px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--feed-ink); background:var(--feed-soft); display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px; border-radius:100px; margin-bottom:22px;
+}
+h1.hero-title{
+  font-family:var(--font-display); font-weight:700; font-optical-sizing:auto;
+  font-size:clamp(2.6rem, 5.4vw, 4.6rem); line-height:0.98; letter-spacing:-0.01em;
+  margin:0 0 20px; text-wrap:balance; max-width:16ch;
+}
+.hero-sub{ font-size:1.2rem; color:var(--ink-soft); max-width:58ch; margin:0 0 30px; text-wrap:pretty;}
+.hero-meta{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:48px; }
+.chip{
+  font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft);
+  border:1px solid var(--line-strong); border-radius:100px; padding:7px 14px;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.chip svg{width:13px;height:13px;flex:none;}
+
+/* ============ ARCHITECTURE DIAGRAM ============ */
+.diagram-card{
+  background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius);
+  padding:28px 28px 22px; box-shadow:var(--shadow);
+}
+.diagram-scroll{ overflow-x:auto; padding-bottom:6px; }
+.diagram-scroll svg{ display:block; min-width:920px; width:100%; height:auto; }
+.node-rect{ fill:var(--paper); stroke-width:1.6; }
+.node-label{ font-family:var(--font-mono); font-size:13px; fill:var(--ink); font-weight:500; }
+.node-sub{ font-family:var(--font-mono); font-size:10.5px; fill:var(--ink-faint); }
+.flow-line{ fill:none; stroke-width:2; stroke-dasharray:6 6; }
+@media (prefers-reduced-motion: no-preference){
+  .flow-line{ animation: dash 1.6s linear infinite; }
+}
+@keyframes dash{ to{ stroke-dashoffset:-24; } }
+.legend{ display:flex; flex-wrap:wrap; gap:22px; margin-top:18px; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); }
+.legend span{ display:inline-flex; align-items:center; gap:7px; }
+.legend i{ width:10px;height:10px;border-radius:3px; display:inline-block; }
+
+/* ============ SECTION SCAFFOLDING ============ */
+section{ padding:56px 0; border-top:1px solid var(--line); }
+.section-head{ max-width:62ch; margin-bottom:34px; }
+.eyebrow-label{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--ink-faint); margin:0 0 10px;
+}
+h2{
+  font-family:var(--font-display); font-weight:600; font-size:clamp(1.7rem,3vw,2.4rem);
+  margin:0 0 10px; text-wrap:balance;
+}
+.lede{ color:var(--ink-soft); font-size:1.05rem; max-width:64ch; }
+
+/* ============ OBJECTIVES / CONCEPTS ============ */
+.obj-list{ list-style:none; margin:0; padding:0; display:grid; gap:2px; max-width:72ch; }
+.obj-list li{
+  display:grid; grid-template-columns:26px 1fr; gap:14px; padding:14px 0;
+  border-bottom:1px solid var(--line); align-items:start;
+}
+.obj-list li:first-child{ border-top:1px solid var(--line); }
+.obj-list .mark{ color:var(--ai); font-family:var(--font-mono); font-size:14px; margin-top:2px; }
+.node-ref{ color:var(--ai); font-weight:600; }
+
+.concept-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+.concept-card{ background:var(--paper); padding:24px; }
+.concept-card svg{ width:30px; height:30px; color:var(--feed); margin-bottom:14px; }
+.concept-card h3{ font-family:var(--font-body); font-size:15px; font-weight:700; margin:0 0 8px; }
+.concept-card p{ font-size:13.6px; color:var(--ink-soft); margin:0; }
+
+/* ============ STEPS LAYOUT + RAIL ============ */
+.build-layout{ display:grid; grid-template-columns:64px 1fr; gap:0; align-items:start; }
+.rail{ position:sticky; top:76px; display:flex; flex-direction:column; align-items:center; height:100%; }
+.rail-track{ position:relative; width:2px; background:var(--line); flex:1; margin-top:6px; border-radius:2px; }
+.rail-fill{ position:absolute; top:0; left:0; width:100%; background:var(--ai); border-radius:2px; height:0%; transition:height .25s ease; }
+.rail-dot{
+  width:11px; height:11px; border-radius:50%; background:var(--paper); border:2px solid var(--line-strong);
+  position:absolute; left:50%; transform:translate(-50%,-50%); transition:.2s;
+}
+.rail-dot.active{ background:var(--ai); border-color:var(--ai); box-shadow:0 0 0 4px var(--ai-soft); }
+@media (max-width:900px){ .build-layout{ grid-template-columns:1fr; } .rail{ display:none; } }
+
+.steps{ display:flex; flex-direction:column; gap:64px; padding-left:8px; }
+.step{ scroll-margin-top:90px; }
+.step-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:6px; flex-wrap:wrap; }
+.step-num{ font-family:var(--font-display); font-size:2.6rem; font-weight:700; line-height:1; color:var(--ink-faint); }
+.step-tag{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+  padding:4px 10px; border-radius:100px; font-weight:600;
+}
+.tag-trigger{ background:var(--paper-raised); color:var(--ink-soft); border:1px solid var(--line-strong); }
+.tag-feed{ background:var(--feed-soft); color:var(--feed-ink); }
+.tag-ai{ background:var(--ai-soft); color:var(--ai-ink); }
+.step h3.step-title{ font-family:var(--font-body); font-size:1.5rem; font-weight:700; margin:4px 0 18px; }
+.step-node-name{ font-family:var(--font-mono); font-size:0.95em; background:var(--paper-raised); padding:1px 6px; border-radius:4px; }
+
+.step ol.instructions{ margin:0 0 20px; padding-left:22px; max-width:66ch; }
+.step ol.instructions li{ margin-bottom:8px; padding-left:4px; }
+.step ol.instructions code, .step p code{
+  font-family:var(--font-mono); font-size:0.88em; background:var(--paper-raised);
+  padding:1px 5px; border-radius:4px; border:1px solid var(--line);
+}
+
+pre.code-block{
+  background:var(--code-bg); color:var(--code-ink); border-radius:var(--radius);
+  padding:18px 20px; overflow-x:auto; font-family:var(--font-mono); font-size:13px; line-height:1.6;
+  margin:0 0 20px; max-width:78ch; box-shadow:var(--shadow);
+}
+pre.code-block .filename{ display:block; font-family:var(--font-mono); font-size:11px; color:var(--code-comment); margin-bottom:10px; letter-spacing:0.03em; }
+.hljs-comment{ color:var(--code-comment); }
+.hljs-string{ color:var(--code-string); }
+.hljs-keyword,.hljs-literal{ color:var(--code-key); }
+.hljs-number{ color:var(--code-num); }
+.hljs-title.function_, .hljs-title{ color:var(--code-fn); }
+.hljs-variable, .hljs-property{ color:var(--code-ink); }
+.hljs-regexp{ color:var(--code-string); }
+
+.prompt-block{
+  background:var(--paper-raised); border:1px dashed var(--line-strong); border-radius:var(--radius);
+  padding:18px 20px; font-family:var(--font-mono); font-size:12.8px; line-height:1.65; white-space:pre-wrap;
+  max-width:78ch; margin:0 0 20px; color:var(--ink-soft);
+}
+
+/* ============ CALLOUTS ============ */
+.callout{
+  border-radius:var(--radius); padding:16px 18px; margin:0 0 16px; max-width:70ch;
+  display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start;
+  border:1px solid var(--line);
+}
+.callout svg{ width:18px; height:18px; margin-top:1px; flex:none; }
+.callout .co-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:4px; }
+.callout p{ margin:0; font-size:14px; }
+.callout.why{ background:var(--paper-raised); }
+.callout.why svg{ color:var(--ink-soft); }
+.callout.mistake{ background:var(--warn-soft); border-color:transparent; }
+.callout.mistake svg, .callout.mistake .co-label{ color:var(--warn); }
+.callout.tip{ background:var(--tip-soft); border-color:transparent; }
+.callout.tip svg, .callout.tip .co-label{ color:var(--tip); }
+.callout.check{ background:var(--check-soft); border-color:transparent; }
+.callout.check svg, .callout.check .co-label{ color:var(--check); }
+
+/* ============ NODE PICKER CARD ============ */
+.node-pick{
+  display:flex; align-items:center; gap:14px; max-width:70ch;
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--paper-raised); padding:14px 18px; margin:0 0 16px;
+}
+.node-pick .np-icon{
+  width:38px; height:38px; flex:none; border-radius:10px;
+  background:var(--paper); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+}
+.node-pick .np-icon svg{ width:20px; height:20px; }
+.node-pick .np-body{ min-width:0; }
+.node-pick .np-name{
+  font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:6px;
+}
+.node-pick .np-name svg{ width:14px; height:14px; color:#e8a33d; }
+.node-pick .np-desc{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+
+.frame{
+  border:1px solid var(--line-strong); border-radius:var(--radius); background:var(--paper-raised);
+  padding:16px; max-width:78ch; margin:0 0 20px;
+}
+.frame-cap{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); margin-top:10px; }
+.frame-schematic{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:14px; }
+
+/* ============ WIRING GAP ILLUSTRATION ============ */
+.gap-figure{ max-width:78ch; margin:0 0 24px; }
+.gap-figure svg{ width:100%; height:auto; display:block; }
+.gap-caption{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); margin-top:8px; }
+
+/* ============ RECAP STRIP ============ */
+.recap-strip{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+.recap-node{
+  font-family:var(--font-mono); font-size:12px; padding:8px 12px; border-radius:8px;
+  border:1px solid var(--line-strong); display:flex; align-items:center; gap:8px; background:var(--paper-raised);
+}
+.recap-node svg{ width:13px; height:13px; color:var(--check); }
+.recap-arrow{ color:var(--ink-faint); font-family:var(--font-mono); display:flex; align-items:center; }
+
+/* ============ TABLE ============ */
+.table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); }
+table.trouble{ border-collapse:collapse; width:100%; min-width:760px; font-size:13.8px; }
+table.trouble th{
+  text-align:left; font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+  color:var(--ink-faint); background:var(--paper-raised); padding:12px 16px; border-bottom:1px solid var(--line);
+}
+table.trouble td{ padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.trouble tr:last-child td{ border-bottom:none; }
+table.trouble td.symptom{ font-family:var(--font-mono); font-size:12.6px; color:var(--warn); max-width:220px; }
+table.trouble td.fix{ color:var(--ink-soft); }
+
+/* ============ MARGINALIA / BEST PRACTICES ============ */
+.marginalia{ display:grid; gap:0; max-width:76ch; }
+.marginalia .item{
+  display:grid; grid-template-columns:150px 1fr; gap:20px; padding:18px 0; border-top:1px solid var(--line);
+}
+.marginalia .item:last-child{ border-bottom:1px solid var(--line); }
+.marginalia .tag{ font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.05em; padding-top:2px; }
+.marginalia p{ margin:0; font-size:14.5px; }
+
+/* ============ STRETCH GOALS ============ */
+.stretch-list{ list-style:none; margin:0; padding:0; display:grid; gap:16px; max-width:70ch; }
+.stretch-list li{
+  border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; display:grid;
+  grid-template-columns:34px 1fr; gap:14px; background:var(--paper-raised);
+}
+.stretch-list .sn{ font-family:var(--font-mono); color:var(--feed-ink); font-weight:700; }
+.stretch-list h4{ margin:0 0 4px; font-size:14.5px; }
+.stretch-list p{ margin:0; font-size:13.5px; color:var(--ink-soft); }
+
+/* ============ KNOWLEDGE CHECK ============ */
+.kc{ display:grid; gap:10px; max-width:74ch; }
+details.kc-item{ border:1px solid var(--line); border-radius:var(--radius); background:var(--paper-raised); overflow:hidden; }
+details.kc-item summary{
+  cursor:pointer; list-style:none; padding:16px 18px; font-weight:600; font-size:14.5px; display:flex;
+  justify-content:space-between; align-items:center; gap:12px;
+}
+details.kc-item summary::-webkit-details-marker{ display:none; }
+details.kc-item summary::after{ content:"+"; font-family:var(--font-mono); color:var(--ink-faint); font-size:18px; flex:none; }
+details.kc-item[open] summary::after{ content:"–"; }
+details.kc-item .kc-answer{ padding:0 18px 18px; font-size:14px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px; }
+
+footer{ padding:48px 0 80px; }
+footer p{ color:var(--ink-soft); max-width:64ch; font-size:14.5px; }
+footer .resources{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink-faint); margin-top:18px; line-height:1.9; }
+</style>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="dot"></span>n8n praktinė laboratorija</div>
+    <nav>
+      <a href="#architecture">Architektūra</a>
+      <a href="#build">Kūrimas</a>
+      <a href="#troubleshoot">Trikčių šalinimas</a>
+      <a href="#check">Žinių patikrinimas</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero" style="border-top:none;">
+    <div class="hero-eyebrow">Schedule → Score → Draft</div>
+    <h1 class="hero-title">Daily Dev Digest Workflow</h1>
+    <p class="hero-sub">n8n workflow, kuris automatiškai paleidžiamas pagal nustatytą laiką, pasiima naujienas ir postus iš tavo RSS feed'ų, o tada naujausiu Gemini modeliu juos įvertina ir paruošia dienos suvestinę - naudingą kaip tik todėl, kad neapkrauna tavęs pertekline informacija. Žinutė nesiunčiama iš karto: n8n sukuria Draft'ą Gmail'e, kad galėtum peržiūrėti ir patvirtinti prieš siunčiant.</p>
+    <div class="hero-meta">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>45–60 min</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>n8n Cloud</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8l9 6 9-6"/></svg>Gmail OAuth2 (draft'ams)</span>
+    </div>
+
+    <div id="architecture"></div>
+    <div class="diagram-card">
+      <div class="diagram-scroll">
+        <svg viewBox="0 0 1080 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Workflow: Schedule Daily, List of RSS Feeds, Split Out, Retrieve Post Data, Parse RSS data, Digest and Scoring LLM, Parse LLM Output, Create Digest Draft">
+          <!-- connectors -->
+          <g>
+            <path class="flow-line" d="M130 95 H150" stroke="var(--ink-faint)"/>
+            <path class="flow-line" d="M260 95 H280" stroke="var(--feed)"/>
+            <path class="flow-line" d="M390 95 H410" stroke="var(--feed)"/>
+            <path class="flow-line" d="M520 95 H540" stroke="var(--feed)"/>
+            <path class="flow-line" d="M650 95 H670" stroke="var(--ai)"/>
+            <path class="flow-line" d="M780 95 H800" stroke="var(--ai)"/>
+            <path class="flow-line" d="M910 95 H930" stroke="var(--ink-faint)"/>
+          </g>
+          <!-- node 1 trigger -->
+          <g>
+            <rect class="node-rect" x="10" y="65" width="120" height="60" rx="9" stroke="var(--ink-faint)"/>
+            <text class="node-label" x="70" y="90" text-anchor="middle">Schedule</text>
+            <text class="node-sub" x="70" y="106" text-anchor="middle">08:00 daily</text>
+          </g>
+          <!-- node 2 -->
+          <g>
+            <rect class="node-rect" x="150" y="65" width="110" height="60" rx="9" stroke="var(--feed)"/>
+            <text class="node-label" x="205" y="88" text-anchor="middle">List of</text>
+            <text class="node-label" x="205" y="103" text-anchor="middle">RSS Feeds</text>
+          </g>
+          <!-- node 3 -->
+          <g>
+            <rect class="node-rect" x="280" y="65" width="110" height="60" rx="9" stroke="var(--feed)"/>
+            <text class="node-label" x="335" y="90" text-anchor="middle">Split Out</text>
+            <text class="node-sub" x="335" y="106" text-anchor="middle">1 → N items</text>
+          </g>
+          <!-- node 4 -->
+          <g>
+            <rect class="node-rect" x="410" y="65" width="110" height="60" rx="9" stroke="var(--feed)"/>
+            <text class="node-label" x="465" y="88" text-anchor="middle">Retrieve</text>
+            <text class="node-label" x="465" y="103" text-anchor="middle">Post Data</text>
+          </g>
+          <!-- node 5 -->
+          <g>
+            <rect class="node-rect" x="540" y="65" width="110" height="60" rx="9" stroke="var(--feed)"/>
+            <text class="node-label" x="595" y="88" text-anchor="middle">Parse RSS</text>
+            <text class="node-label" x="595" y="103" text-anchor="middle">data</text>
+          </g>
+          <!-- node 6 -->
+          <g>
+            <rect class="node-rect" x="670" y="65" width="130" height="60" rx="9" stroke="var(--ai)"/>
+            <text class="node-label" x="735" y="88" text-anchor="middle">Digest &amp;</text>
+            <text class="node-label" x="735" y="103" text-anchor="middle">Scoring LLM</text>
+          </g>
+          <!-- node 7 -->
+          <g>
+            <rect class="node-rect" x="800" y="65" width="110" height="60" rx="9" stroke="var(--ai)"/>
+            <text class="node-label" x="855" y="88" text-anchor="middle">Parse LLM</text>
+            <text class="node-label" x="855" y="103" text-anchor="middle">Output</text>
+          </g>
+          <!-- node 8 -->
+          <g>
+            <rect class="node-rect" x="930" y="65" width="130" height="60" rx="9" stroke="var(--ink-faint)"/>
+            <text class="node-label" x="995" y="88" text-anchor="middle">Create Digest</text>
+            <text class="node-label" x="995" y="103" text-anchor="middle">Draft</text>
+          </g>
+          <!-- model connector hint -->
+          <path d="M735 125 V150" stroke="var(--ai)" stroke-width="1.4" stroke-dasharray="3 4" fill="none"/>
+          <text class="node-sub" x="735" y="166" text-anchor="middle" style="fill:var(--ai)">Gemini Chat Model</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--ink-faint)"></i>Trigger</span>
+        <span><i style="background:var(--feed)"></i>Feed pipeline</span>
+        <span><i style="background:var(--ai)"></i>AI pipeline</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow-label">Ką išmoksi padaryti</p>
+      <h2>Ko išmoksi</h2>
+    </div>
+    <ul class="obj-list">
+      <li><span class="mark">✓</span><span>Susikurti postų šaltinių sąrašą su <strong class="node-ref">Set</strong> node'u. Taip pat naudojamas <strong class="node-ref">Split Out</strong> - jis iškaido didelį sąrašą į atskirus item'us, todėl galime parsisiųsti daugiau postų lygiagrečiai. Naujo šaltinio pridėjimas niekada nereiškia naujo node'o.</span></li>
+      <li><span class="mark">✓</span><span>Paaiškinti n8n per-item vykdymo modelį: kai node'as gauna kelis item'us, jis savo logiką paleidžia atskirai kiekvienam iš jų, o gautus rezultatus vėl sujungia į vieną sąrašą.</span></li>
+      <li><span class="mark">✓</span><span>Sukuriamas AI prompt'as, pagal kurį vertinami post'ai naudojant naujausią Gemini modelį, o rezultatai grąžinami pagal JSON schemą.</span></li>
+      <li><span class="mark">✓</span><span>Vien AI modelio atsakymo neužtenka - jį reikia išparsinti (parse), kad ilgas modelio grąžintas tekstas virstų struktūrizuotais duomenimis, kuriuos vėliau galime panaudoti tolimesniuose workflow žingsniuose.</span></li>
+      <li><span class="mark">✓</span><span>Išmokti, kaip gautus rezultatus siųsti paštu, pvz., per <strong class="node-ref">Gmail</strong>. Sukursime <strong>Draft</strong>, kurį dar galima pataisyti, o žmogus pats nuspręs, siųsti ar ne - human in the loop.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow-label">Prieš pradedant</p>
+      <h2>Keturi dalykai, kuriuos gera žinoti</h2>
+    </div>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="12" r="2.3"/><circle cx="12" cy="6" r="2.3"/><circle cx="12" cy="18" r="2.3"/><circle cx="18" cy="12" r="2.3"/><path d="M8 12h1M15 12h1M13 8l-0.7 1M13 16l-0.7-1"/></svg>
+        <h3>Vykdymas kiekvienam item'ui</h3>
+        <p>Node'as savo darbą atlieka atskirai su kiekvienu item'u, kurį gauna. Trys items įeina - trys fetch'ai išeina, iš vieno node'o.</p>
+      </div>
+      <div class="concept-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="6" height="6" rx="1"/><path d="M10 7h4M18 4v6M14 7h2a2 2 0 012 2v3"/><path d="M18 13v3a2 2 0 01-2 2H8a2 2 0 01-2-2v-2"/><rect x="4" y="16" width="6" height="4" rx="1"/><rect x="15" y="16" width="6" height="4" rx="1"/></svg>
+        <h3>Sąrašo išskaidymas</h3>
+        <p><strong class="node-ref">Split Out</strong> paverčia vieną item'ą su sąrašu į kelis atskirus item'us. Pvz., 1 item su 5 RSS post'ais taps 5 items - po vieną kiekvienam post'ui.</p>
+      </div>
+      <div class="concept-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="4" width="14" height="9" rx="2"/><path d="M9 13v3M12 13v5M15 13v3"/><circle cx="9" cy="20" r="1.2"/><circle cx="12" cy="20" r="1.2"/><circle cx="15" cy="20" r="1.2"/></svg>
+        <h3>Modelio connector'is</h3>
+        <p>Basic LLM Chain node'as leidžia prisijungti bet kurį palaikomą LLM modelį, kaip kad Claude, OpenAI ar Gemini. Naudojame Gemini dėl patogumo, bet galite lengvai pakeisti - per modelio connector'į.</p>
+      </div>
+      <div class="concept-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v3M6 8l-3 6h6l-3-6zM18 8l-3 6h6l-3-6zM6 8h12"/><path d="M12 6v14M8 20h8"/></svg>
+        <h3>Pasitikėk, bet patikrink</h3>
+        <p>Modeliui verta duoti kuo mažiau autonomijos - jis gali haliucinuoti. Rūšiavimą, skaičiavimus ir kitą duomenų apdorojimą patikimiau atlikti kodu (JavaScript ar Python), o ne prašyti to iš modelio promptu. Šis workflow modeliu pasitiki tik įvertinimui - o rūšiavimą vis tiek tyliai perdaro kode.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="build">
+    <div class="section-head">
+      <p class="eyebrow-label">Kūrimo eiga, node po node</p>
+      <h2>Aštuoni node'ai, vienas pipeline'as</h2>
+      <p class="lede">Sek žingsnius eilės tvarka, vieną po kito.</p>
+    </div>
+
+    <div class="build-layout">
+      <div class="rail" aria-hidden="true">
+        <div class="rail-track">
+          <div class="rail-fill" id="railFill"></div>
+          <div class="rail-dot" style="top:0%"></div>
+          <div class="rail-dot" style="top:14.28%"></div>
+          <div class="rail-dot" style="top:28.56%"></div>
+          <div class="rail-dot" style="top:42.84%"></div>
+          <div class="rail-dot" style="top:57.12%"></div>
+          <div class="rail-dot" style="top:71.4%"></div>
+          <div class="rail-dot" style="top:85.68%"></div>
+          <div class="rail-dot" style="top:100%"></div>
+        </div>
+      </div>
+
+      <div class="steps">
+
+        <!-- STEP 1 -->
+        <article class="step" id="step-1" data-step="0">
+          <div class="step-head"><span class="step-num">01</span><span class="step-tag tag-trigger">Trigger</span></div>
+          <h3 class="step-title">Pridėk trigerį - <span class="step-node-name">Schedule Daily</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">Schedule Trigger <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></div>
+              <div class="np-desc">Triggers the workflow on a given schedule</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>Schedule Trigger</strong> node'ą. Pervadink jį į <strong>Schedule Daily</strong>.</li>
+            <li>Palik trigerio taisyklę numatytajame <strong>Interval</strong> režime ir nustatyk <strong>Trigger at Hour</strong> reikšmę į <code>8</code>.</li>
+          </ol>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl</span><p>Kiekvienas workflow turi būti kažkaip paleidžiamas - kito kodo, tam tikru laiku, kito agento arba rankiniu būdu (pvz., <strong>Execute Workflow</strong>). Kitaip jis niekada nepasileis. Čia pasirenkame laiką: <strong>Interval</strong> režimas su valanda <code>8</code> tiesiog reiškia „vykdyk kiekvieną dieną 8 val. ryto“.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Node'as rodo Interval režimą su Trigger at Hour nustatytu į <code>8</code>, be klaidų.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 2 -->
+        <article class="step" id="step-2" data-step="1">
+          <div class="step-head"><span class="step-num">02</span><span class="step-tag tag-feed">Feed pipeline</span></div>
+          <h3 class="step-title">Susikurk feed'ų sąrašą - <span class="step-node-name">List of RSS Feeds</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">Edit Fields (Set)</div>
+              <div class="np-desc">Modify, add, or remove item fields</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>Edit Fields (Set)</strong> node'ą po Schedule Daily. Pervadink jį į <strong>List of RSS Feeds</strong>.</li>
+            <li>Pridėk vieną lauką pavadinimu <code>urls</code>, nustatyk jo <strong>Type</strong> į <strong>Array</strong>, su reikšme:</li>
+          </ol>
+          <pre class="code-block"><span class="filename">urls (array)</span><code>["https://dev.to/feed/tag/python", "https://dev.to/feed/tag/ai", "https://dev.to/feed/tag/productivity"]</code></pre>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl</span><p>Šis laukas atsako į klausimą „iš kokių šaltinių imu duomenis“. Naudojame tokį sprendimą, kad vėliau galėtume pridėti dar 5 linkus - tiesiog papildant šį lauką, be pasikartojimo ir be kodo keitimo.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p><code>json.urls</code> turi būti array su 3 elementais, ne tekstinė eilutė.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 3 -->
+        <article class="step" id="step-3" data-step="2">
+          <div class="step-head"><span class="step-num">03</span><span class="step-tag tag-feed">Feed pipeline</span></div>
+          <h3 class="step-title">Išskaidyk sąrašą - <span class="step-node-name">Split Out</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h4l4-6h8M4 12h4l4 6h8"/><path d="M17 3l3 3-3 3M17 15l3 3-3 3"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">Split Out</div>
+              <div class="np-desc">Turn a list inside item(s) into separate items</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>Split Out</strong> node'ą po List of RSS Feeds.</li>
+            <li>Nustatyk <strong>Field to Split Out</strong> į <code>urls</code>.</li>
+          </ol>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl</span><p>Turėjome 1 item'ą su 3 URL sąraše. Split Out jį paverčia į 3 items - po vieną kiekvienam URL. Tada tolimesni node'ai kiekvieną apdoroja atskirai, patys.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Testuojant grąžinami <strong>3 atskiri items</strong>, kiekvienas su <code>json.urls</code> kaip viena URL eilutė.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 4 -->
+        <article class="step" id="step-4" data-step="3">
+          <div class="step-head"><span class="step-num">04</span><span class="step-tag tag-feed">Feed pipeline</span></div>
+          <h3 class="step-title">Parsisiųsk kiekvieną feed'ą - <span class="step-node-name">Retrieve Post Data</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">RSS Read</div>
+              <div class="np-desc">Reads data from an RSS Feed</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>RSS Feed Read</strong> node'ą po Split Out. Pervadink jį į <strong>Retrieve Post Data</strong>.</li>
+            <li>Nustatyk <strong>URL</strong> į <code>{{ $json.urls }}</code>.</li>
+            <li>Node'o nustatymuose įjunk <strong>Retry On Fail</strong>, Wait Between Tries <code>3000</code> ms.</li>
+          </ol>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl</span><p>Čia ir pasireiškia n8n per-item vykdymas: node'as gavo 3 items, todėl fetch'ą atlieka 3 kartus, po vieną kiekvienam URL - be jokio papildomo node'o.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Testuojant grąžinama daug items, kiekvienas su <code>title</code>, <code>link</code>, <code>pubDate</code>, <code>content</code> arba <code>contentSnippet</code>.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 5 -->
+        <article class="step" id="step-5" data-step="4">
+          <div class="step-head"><span class="step-num">05</span><span class="step-tag tag-feed">Feed pipeline</span></div>
+          <h3 class="step-title">Išvalyk ir sujunk į vieną - <span class="step-node-name">Parse RSS data</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 8l-5 4 5 4M15 8l5 4-5 4"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">Code</div>
+              <div class="np-desc">Run custom JavaScript or Python code</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>Code</strong> node'ą po Retrieve Post Data. Režimas: „Run Once for All Items“.</li>
+          </ol>
+          <pre class="code-block"><span class="filename">Parse RSS data - Code node</span><code class="language-javascript">// Ši funkcija išvalo teksto lauką nuo HTML žymių
+function clean(raw) {
+  if (!raw) return '';
+  let text = String(raw);
+  text = text.replace(/&lt;(script|style|pre)[^&gt;]*&gt;[\s\S]*?&lt;\/\1&gt;/gi, ' ');
+  text = text.replace(/&lt;\/?(p|div|li|h[1-6]|br|tr|blockquote)[^&gt;]*&gt;/gi, '\n');
+  text = text.replace(/&lt;[^&gt;]+&gt;/g, '');
+  return text.trim();
+}
+
+// Kiekvienam gautam item'ui paliekame tik reikalingus, jau išvalytus laukus
+const items = $input.all().map(item =&gt; ({
+  title: clean(item.json.title),
+  creator: item.json.creator || item.json['dc:creator'] || '',
+  link: item.json.link,
+  pubDate: item.json.isoDate || item.json.pubDate,
+  categories: item.json.categories || [],
+  content: clean(item.json.content),
+}));
+
+// Sutraukiame viską į VIENĄ item'ą, kad kitas žingsnis matytų visą sąrašą iš karto
+return [{ json: { count: items.length, items } }];</code></pre>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl sutraukti į vieną item'ą</span><p>Iki šiol viskas buvo po vieną item'ą kiekvienam straipsniui. Kitam žingsniui reikia visos partijos viename prompt'e, kad modelis galėtų straipsnius palyginti ir surikiuoti vienus prieš kitus.</p></div>
+          </div>
+          <div class="callout tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3 11.2c.6.4 1 1 1 1.8h4c0-.8.4-1.4 1-1.8A6 6 0 0012 3z"/></svg>
+            <div><span class="co-label">Po dangčiu</span><p>Šis žingsnis sąmoningai nededublikuoja pagal URL - tai perduodama AI prompt'ui kitame žingsnyje, kuris gali pastebėti beveik identiškas, ne tik baitas-į-baitą vienodas, istorijas, tik jau ne taip nuspėjamai.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Vienas item'as su <code>json.count</code> ir <code>json.items</code> - išvalyti straipsnių objektai.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 6 -->
+        <article class="step" id="step-6" data-step="5">
+          <div class="step-head"><span class="step-num">06</span><span class="step-tag tag-ai">AI pipeline</span></div>
+          <h3 class="step-title">Įvertink ir sudaryk suvestinę su Gemini - <span class="step-node-name">Digest &amp; Scoring LLM</span></h3>
+          <ol class="instructions">
+            <li>Pridėk <strong>Basic LLM Chain</strong> node'ą. Prijunk <strong>Google Gemini Chat Model</strong> node'ą per modelio connector'į (jungiasi iš apačios, ne iš šono). Prijunk credentials ir aiškiai pasirink modelį.</li>
+            <li>Nustatyk <strong>Prompt (User Message)</strong> į „Define“ režimą:</li>
+          </ol>
+          <div class="prompt-block">You are a technical newsletter editor. You will receive a JSON array of blog/RSS posts. Your job is to produce a digest.
+
+Score each post 0–100 on digest‑worthiness using this rubric:
+- Relevance (0‑40)   - Depth (0‑25)
+- Timeliness (0‑15)  - Actionability (0‑20)
+
+Deduplicate near‑identical stories - keep the best, note duplicate_count.
+
+Return ONLY valid JSON: { intro, top_stories[≥70, max 5], all_stories[all, sorted desc] }
+
+Here are today's posts ({{ $json.count }} total):
+{{ JSON.stringify($json.items) }}</div>
+          <ol class="instructions" start="3">
+            <li>Node'o nustatymuose įjunk <strong>Retry On Fail</strong>, Max Tries <code>2</code>, Wait Between Tries <code>5000</code> ms.</li>
+          </ol>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl svertinis rubrikas</span><p>Keturi pavadinti subkriterijai, sumuojantys iki 100, modeliui duoda konkretų karkasą vietoj nesuformuoto „įvertink 1–10“. Rezultatas - nuoseklesnis vertinimas skirtinguose paleidimuose, nors į schemą grįžta tik bendra suma.</p></div>
+          </div>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl modelis dar ir rūšiuoja</span><p>Pakeisti „top stories = 70+“ į „80+“ vėliau yra vienos eilutės prompt'o pakeitimas, o ne kodo pakeitimas. Kompromisas - pasitiki, kad modelis surūšiuos teisingai, kuo kitas žingsnis pilnai nepasitiki.</p></div>
+          </div>
+          <div class="callout mistake">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17.5h.01"/></svg>
+            <div><span class="co-label">Dažna klaida</span><p>Palikti Gemini Chat Model be credentials ar nepasirinkto modelio. Chain iškart nulūžta - visada konfigūruok patį sub-node'ą, ne tik chain node'ą.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Testuojant grąžinamas <code>text</code> arba <code>output</code> laukas su kažkuo, kas atrodo kaip JSON - dar neprivalo būti idealiai švarus.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 7 -->
+        <article class="step" id="step-7" data-step="6">
+          <div class="step-head"><span class="step-num">07</span><span class="step-tag tag-ai">AI pipeline</span></div>
+          <h3 class="step-title">Apdorok AI atsakymą, sudėk laišką - <span class="step-node-name">Parse LLM Output</span></h3>
+          <div class="node-pick">
+            <span class="np-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 8l-5 4 5 4M15 8l5 4-5 4"/></svg></span>
+            <div class="np-body">
+              <div class="np-name">Code</div>
+              <div class="np-desc">Run custom JavaScript or Python code</div>
+            </div>
+          </div>
+          <ol class="instructions">
+            <li>Pridėk <strong>Code</strong> node'ą po Digest &amp; Scoring LLM.</li>
+          </ol>
+          <pre class="code-block"><span class="filename">Parse LLM Output - Code node</span><code class="language-javascript">function parseDigest(raw) {
+  let str = String(raw).trim();
+  str = str.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '');
+  return JSON.parse(str);
+}
+
+const item = $input.all()[0];
+const raw = item.json.text ?? item.json.output ?? item.json;
+const digest = typeof raw === 'string' ? parseDigest(raw) : raw;
+
+// safety net: sort all_stories by score desc in case the model didn't
+const allSorted = [...digest.all_stories].sort((a, b) =&gt; b.score - a.score);
+
+return [{
+  json: {
+    subject: `Dev Digest - ${digest.top_stories.length} top stories, ${allSorted.length} total`,
+    html /* built from digest + allSorted */,
+    text /* plain-text version */,
+  }
+}];</code></pre>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl tas ?? grandinėlė</span><p><code>item.json.text ?? item.json.output ?? item.json</code> apsaugo nuo neaiškumo dėl lauko pavadinimo, ne nuo blogo turinio - skirtingos LLM chain node'o versijos savo output lauką pavadina skirtingai.</p></div>
+          </div>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl vis tiek perrūšiuoti kode</span><p>Prompt'as jau prašė rikiuoti mažėjančia tvarka - bet vietoj to, kad tiesiog pasitikėtų, ši eilutė atlieka pigų, determinuotą perrūšiavimą, kad garantuotų vienintelį invariantą, nuo kurio realiai priklauso laiško išdėstymas.</p></div>
+          </div>
+          <div class="callout mistake">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17.5h.01"/></svg>
+            <div><span class="co-label">Pastebėk spragą</span><p>Čia nėra <code>try</code>/<code>catch</code>. Jei <code>JSON.parse</code> meta klaidą, šis node'as taip pat lūžta ir visas vykdymas žlunga be jokio sukurto draft'o - pagrįstas supaprastinimas prototipui, bet vertas sustiprinti vėliau.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Vienas item'as su <code>subject</code>, <code>html</code>, <code>text</code>, <code>topStoryCount</code>, <code>totalCount</code>. <code>html</code> turi tavo tikrus pavadinimus, įvertinimus ir nuorodas.</p></div>
+          </div>
+        </article>
+
+        <!-- STEP 8 -->
+        <article class="step" id="step-8" data-step="7">
+          <div class="step-head"><span class="step-num">08</span><span class="step-tag tag-trigger">Delivery</span></div>
+          <h3 class="step-title">Sukurk Gmail draft'ą - <span class="step-node-name">Create Digest Draft</span></h3>
+          <ol class="instructions">
+            <li>Pridėk <strong>Gmail</strong> node'ą. Nustatyk <strong>Resource</strong> į <strong>Draft</strong> (ne Message/Send).</li>
+            <li>Nustatyk <strong>Email Type</strong> į <strong>HTML</strong>, <strong>Message</strong> į <code>{{ $json.html }}</code>.</li>
+            <li><strong>Options → Send To</strong> įrašyk savo adresą. Prijunk Gmail OAuth2 credentials.</li>
+          </ol>
+          <div class="callout why">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            <div><span class="co-label">Kodėl draft'as, ne send'as</span><p>Draft'as laukia tavo Drafts aplanke, kol žmogus peržvelgs ir paspaus siųsti - protingas numatytasis pasirinkimas, kol dar kuri pasitikėjimą AI sugeneruotu turiniu. Perjungimas į Send vėliau yra vieno lauko pakeitimas.</p></div>
+          </div>
+
+          <p style="font-size:14px;color:var(--ink-soft);max-width:70ch;margin:0 0 12px;"><strong>Dažna klaida - ir reali šiame konkrečiame node'e.</strong> Parse LLM Output suskaičiavo tikrai naudingą subject eilutę ir įdėjo ją į <code>$json.subject</code> - bet jei čia Subject paliktas kaip statinis tekstas, ta reikšmė niekada nenuskaitoma:</p>
+
+          <figure class="gap-figure">
+            <svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wiring diagram: computed subject value, one path unused, one path wired">
+              <rect x="10" y="20" width="180" height="46" rx="8" fill="var(--paper-raised)" stroke="var(--ai)" stroke-width="1.5"/>
+              <text x="100" y="48" text-anchor="middle" class="node-label">$json.subject</text>
+
+              <path d="M190 34 H320" stroke="var(--warn)" stroke-width="2" stroke-dasharray="3 5" fill="none"/>
+              <text x="255" y="26" text-anchor="middle" class="node-sub" style="fill:var(--warn)">niekada nenuskaitoma</text>
+              <rect x="320" y="10" width="220" height="46" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+              <text x="430" y="38" text-anchor="middle" class="node-label" style="fill:var(--warn)">Subject: "Daily News Digest"</text>
+
+              <path d="M190 55 H320" stroke="var(--check)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+              <text x="255" y="90" text-anchor="middle" class="node-sub" style="fill:var(--check)">pataisymas: sujunk</text>
+              <rect x="320" y="70" width="220" height="46" rx="8" fill="var(--check-soft)" stroke="var(--check)" stroke-width="1.5"/>
+              <text x="430" y="98" text-anchor="middle" class="node-label" style="fill:var(--check)">Subject: {{ $json.subject }}</text>
+
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--check)"/></marker>
+              </defs>
+            </svg>
+            <figcaption class="gap-caption">Aukščiau suskaičiuota reikšmė naudinga tik tada, jei kažkas žemiau ją realiai nuskaito - „wiring gap“ lengva praleisti, nes viskas vis tiek veikia be klaidų.</figcaption>
+          </figure>
+
+          <div class="callout mistake">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17.5h.01"/></svg>
+            <div><span class="co-label">Dažna klaida</span><p>Įrašytas gavėjo adresas Send To lauke lengvai pamirštamas pakartotinai naudojant bendrą workflow - įskaitant šitą. Visada patikrink prieš naudodamas pakartotinai.</p></div>
+          </div>
+          <div class="callout check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>
+            <div><span class="co-label">Checkpoint</span><p>Po pilno test paleidimo tavo Gmail <strong>Drafts</strong> aplanke (ne Inbox) atsiranda naujas draft'as su pataisytu dinaminiu subject ir suformatuotu HTML turiniu.</p></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow-label">Pilnas paleidimas</p>
+      <h2>Testuok visą pipeline'ą</h2>
+      <p class="lede">Paspausk Test workflow ir stebėk, kaip kiekvienas node'as užsidega eilės tvarka:</p>
+    </div>
+    <div class="recap-strip">
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Schedule Daily</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>List of RSS Feeds</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Split Out <em style="font-style:normal;color:var(--ink-faint)">(3 items)</em></span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Retrieve Post Data</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Parse RSS data</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Digest &amp; Scoring LLM</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Parse LLM Output</span>
+      <span class="recap-arrow">→</span>
+      <span class="recap-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6"/></svg>Create Digest Draft</span>
+    </div>
+    <p style="font-size:14.5px;color:var(--ink-soft);max-width:66ch;">Atsidaryk Gmail Drafts aplanką ir patikrink, ar draft'as sukurtas, subject atspindi tavo Step 8 pataisymą, o HTML turinys parodo realius straipsnius su veikiančiomis nuorodomis. Jei kuris nors node'as šviečia raudonai - paspausk jį, klaidos panelė nurodys, kuri išraiška nepavyko.</p>
+  </section>
+
+  <section id="troubleshoot">
+    <div class="section-head">
+      <p class="eyebrow-label">Kai kažkas raudona</p>
+      <h2>Trikčių šalinimo gidas</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="trouble">
+        <thead><tr><th>Simptomas</th><th>Tikėtina priežastis</th><th>Sprendimas</th></tr></thead>
+        <tbody>
+          <tr><td class="symptom">Split Out grąžina 1 item'ą, ne 3</td><td>urls lauko Type liko String, ne Array</td><td class="fix">Pakeisk lauko Type į Array ir įrašyk reikšmę kaip JSON array.</td></tr>
+          <tr><td class="symptom">Retrieve Post Data meta klaidą arba grąžina tik vieną feed'ą</td><td>Split Out netiekė 3 atskirų items toliau</td><td class="fix">Pirma testuok vien Split Out - įsitikink, kad yra 3 items, tik tada testuok toliau.</td></tr>
+          <tr><td class="symptom">Digest &amp; Scoring LLM iškart nulūžta</td><td>Gemini Chat Model neturi credentials arba nepasirinktas modelis</td><td class="fix">Atsidaryk patį Gemini sub-node'ą, prijunk API raktą, pasirink modelį.</td></tr>
+          <tr><td class="symptom">Parse LLM Output meta klaidą, draft'as nesukuriamas</td><td>Atsakymas nebuvo švarus JSON net nuėmus code fence'us</td><td class="fix">Sugriežtink instrukciją „jokio teksto už JSON ribų“; pridėk try/catch fallback'ą.</td></tr>
+          <tr><td class="symptom">Draft'o subject visada bendrinis</td><td>Subject laukas yra statinis tekstas, ne {{ $json.subject }}</td><td class="fix">Sujunk Subject lauką su suskaičiuota reikšme.</td></tr>
+          <tr><td class="symptom">Joks draft'as niekur neatsiranda</td><td>Tikrini Inbox/Sent vietoj Drafts</td><td class="fix">Resource yra „Draft“ - niekas niekada nesiunčiama. Tikrink būtent Drafts.</td></tr>
+          <tr><td class="symptom">Tuščias creator arba likęs HTML santraukoje</td><td>Feed'e nėra dc:creator, arba neįprastas tag'as prasmuko pro clean()</td><td class="fix">Tuščias creator yra normalu; jei prasiskverbia HTML, papildyk tag'ų šalinimo regex'ą.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow-label">Pasiimk su savimi</p>
+      <h2>Geriausios praktikos</h2>
+    </div>
+    <div class="marginalia">
+      <div class="item"><span class="tag">Mastas</span><p>Rinkis duomenimis paremtą sąrašą vietoj hardcoded lygiagrečių node'ų, kai šaltinių gali daugėti.</p></div>
+      <div class="item"><span class="tag">Pasitikėjimas</span><p>Kai rūšiavimą, ribas ar dedup'inimą perduodi promptui, kode pridėk pigų saugiklį tam invariantui, kuris tikrai svarbus.</p></div>
+      <div class="item"><span class="tag">Pakartotinis naudojimas</span><p>Hardcoded gavėjo adresus ir statiškas subject eilutes traktuok kaip dalykus, kuriuos reikia patikrinti, o ne aklai pasitikėti - šis workflow turi abu.</p></div>
+      <div class="item"><span class="tag">Versijos</span><p>Output lauko pavadinimo neaiškumą apdorok atsargiai, taip kaip <code>text ?? output ?? json</code>.</p></div>
+      <div class="item"><span class="tag">Prototipas</span><p>Klaidų apdorojimo trūkumas yra pagrįstas supaprastinimas pirmam bandymui - bet tai pažymėk ir sustiprink, prieš pradedant juo remtis kasdien.</p></div>
+      <div class="item"><span class="tag">Pristatymas</span><p>Kol nepasitiki AI sugeneruotu rezultatu, rinkis žmogaus peržiūrą (draft'ą) vietoj pilnos automatizacijos.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow-label">Praplėsk workflow</p>
+      <h2>Papildomi iššūkiai</h2>
+    </div>
+    <ul class="stretch-list">
+      <li><span class="sn">1</span><div><h4>Pataisyk subject sujungimą</h4><p>Nustatyk Subject į <code>{{ $json.subject }}</code> - mažiausias ir konkrečiausias pataisymas visoje laboratorijoje.</p></div></li>
+      <li><span class="sn">2</span><div><h4>Pridėk fallback'ą į Parse LLM Output</h4><p>Apgaubk <code>parseDigest(raw)</code> try/catch: sudaryk minimalią suvestinę iš žalių straipsnių, kad ir netvarkingas atsakymas vis tiek sukurtų draft'ą.</p></div></li>
+      <li><span class="sn">3</span><div><h4>Apriboki iki darbo dienų</h4><p>Perjunk Schedule Daily į Cron Expression režimą: <code>0 8 * * 1-5</code>.</p></div></li>
+      <li><span class="sn">4</span><div><h4>Pridėk ketvirtą feed'ą, be jokių naujų node'ų</h4><p>Pridėk dar vieną URL į urls array ir paleisk iš naujo - įsitikink, kad teka 4 items be jokių kitų pakeitimų.</p></div></li>
+      <li><span class="sn">5</span><div><h4>Pereik nuo draft'o prie send'o</h4><p>Pakeisk Resource į Message (Send), kai jau pasitiki suvestine - nebūtina, bet gali apsaugoti Slack patvirtinimo žingsniu.</p></div></li>
+    </ul>
+  </section>
+
+  <section id="check">
+    <div class="section-head">
+      <p class="eyebrow-label">Pasitikrink save</p>
+      <h2>Žinių patikrinimas</h2>
+    </div>
+    <div class="kc">
+      <details class="kc-item"><summary>Kodėl naujo RSS šaltinio pridėjimas reikalauja tik urls array redagavimo, o ne naujo node'o?</summary><div class="kc-answer">Šaltinių skaičius nėra užkoduotas node grafe - jis priklauso nuo to, kiek įrašų yra <code>urls</code>. Split Out tą array išskaido į po vieną item'ą kiekvienam URL, o Retrieve Post Data (per per-item vykdymą) automatiškai parsisiunčia po vieną feed'ą kiekvienam item'ui, tad node'ų skaičius niekada nesikeičia.</div></details>
+      <details class="kc-item"><summary>Ką daro Split Out, ir kodėl Retrieve Post Data parsisiunčia tris feed'us turint tik vieną RSS Feed Read node'ą?</summary><div class="kc-answer">Split Out vieno item'o <code>urls</code> array paverčia trimis atskirais items, kiekvienas su viena URL. Retrieve Post Data savo fetch'ą paleidžia po kartą kiekvienam gautam item'ui - trys items reiškia tris HTTP fetch'us, nors fiziškai tai vienas node'as.</div></details>
+      <details class="kc-item"><summary>Prompt'as jau prašo modelio surūšiuoti all_stories - kodėl vis tiek perrūšiuoti kode?</summary><div class="kc-answer">Prompt'o instrukcijos nėra garantija - modelis kartais gali grąžinti neteisingą tvarką, net kai aiškiai paprašyta. Perrūšiavimas kode yra pigus ir determinuotas, tad pašalina bet kokią riziką laiško straipsnių tvarkai, nereikalaujant pasitikėti modelio paklusnumu kiekvieną kartą.</div></details>
+      <details class="kc-item"><summary>Kiekvienas draft'as turi tą pačią subject eilutę, nesvarbu kiek top stories rasta - ką patikrinti pirmiausia?</summary><div class="kc-answer">Ar Create Digest Draft Subject laukas realiai nurodo į <code>{{ $json.subject }}</code>, ar tai tik statinis placeholder tekstas - reikšmė gali būti teisingai suskaičiuota anksčiau, bet niekada nepasiekti lauko, kuris turėtų ją parodyti.</div></details>
+    </div>
+  </section>
+
+  <footer>
+    <div class="section-head" style="margin-bottom:16px;">
+      <p class="eyebrow-label">Santrauka</p>
+      <h2>Ką šis pattern'as apibendrina</h2>
+    </div>
+    <p>Susikūrei workflow, kuris vieną konfigūruojamą RSS feed'ų sąrašą paverčia kasdiene, AI įvertinta suvestine - naudodamas duomenimis paremtą fan-out, kad atskirtum šaltinių skaičių nuo node'ų skaičiaus, svertinį rubriką nuosekliam vertinimui, atsargų parsinimą sugadintiems ar kitaip suformuotiems AI atsakymams, ir peržiūra-pirma pristatymo žingsnį. Ta pati struktūra tinka konkurentų pranešimų sekimui, klientų atsiliepimų suvestinei ar mokslinių straipsnių kuratoriui - tik pakeisk šaltinių sąrašą ir pritaikyk rubriką.</p>
+    <div class="resources">n8n dokumentacija gilesniam supratimui: Edit Fields (Set) · Split Out · RSS Feed Read · Code node · Basic LLM Chain · Gmail draft vs. send</div>
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script>
+  try {
+    document.querySelectorAll('pre.code-block code.language-javascript').forEach(function(block){
+      hljs.highlightElement(block);
+    });
+  } catch(e) {}
+
+  // scroll-spy progress rail
+  (function(){
+    var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail-dot'));
+    var fill = document.getElementById('railFill');
+    if (!steps.length || !dots.length || !fill) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = steps.indexOf(entry.target);
+          dots.forEach(function(d,i){ d.classList.toggle('active', i<=idx); });
+          fill.style.height = (idx/(steps.length-1)*100) + '%';
+        }
+      });
+    }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+    steps.forEach(function(s){ io.observe(s); });
+  })();
+</script>
